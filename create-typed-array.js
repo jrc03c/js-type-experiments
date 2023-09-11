@@ -1,3 +1,4 @@
+const { isDate } = require("@jrc03c/js-math-tools")
 const { pascalify } = require("@jrc03c/js-text-tools")
 
 class TypedArray extends Array {
@@ -8,6 +9,10 @@ class TypedArray extends Array {
       throw new Error(
         `A type must be passed as the first argument to the \`createTypedArray\` function!`,
       )
+    }
+
+    if (type === Array) {
+      throw new Error("It's not possible to create a TypedArray<Array>!")
     }
 
     Object.defineProperty(this, "type", {
@@ -41,13 +46,27 @@ class TypedArray extends Array {
   }
 
   canAccept(value) {
+    if (this.type === Date && isDate(value)) {
+      return true
+    }
+
     if (typeof value === "object") {
-      if (typeof type === "function") {
-        return (
+      if (typeof this.type === "function") {
+        if (
           value instanceof this.type &&
           (this.allowsSubclassInstances ||
             value.constructor.name === this.typeString)
-        )
+        ) {
+          return true
+        }
+
+        if (value instanceof this.constructor) {
+          return true
+        }
+
+        return false
+      } else if (value instanceof this.constructor) {
+        return true
       } else {
         return false
       }
@@ -62,7 +81,9 @@ class TypedArray extends Array {
     } else {
       throw new Error(
         `A TypedArray<${this.typeString}> cannot accept the value: ${
-          typeof value === "string" ? JSON.stringify(value) : value
+          typeof value === "string" || typeof value === "object"
+            ? JSON.stringify(value)
+            : value
         }`,
       )
     }
@@ -87,8 +108,19 @@ class TypedArray extends Array {
   }
 }
 
+const registry = {}
+
 function createTypedArray(type, allowsSubclassInstances) {
-  const tempClass = class Temp extends TypedArray {}
+  const tempClass = (() => {
+    if (registry[type]) {
+      return registry[type]
+    } else {
+      class Temp extends TypedArray {}
+      registry[type] = Temp
+      return Temp
+    }
+  })()
+
   const out = new tempClass(type, allowsSubclassInstances)
 
   Object.defineProperty(out.constructor, "name", {
