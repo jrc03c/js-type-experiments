@@ -1,11 +1,12 @@
+const { isDate } = require("@jrc03c/js-math-tools")
+
 // options must include:
 // - type
 // options can optionally include:
 // - allowsSubclassInstances
-
-function defineTypedProperty(obj, prop, options) {
+function defineTypedProperty(obj, type, prop, options) {
+  options = options || {}
   let _value
-  const { type } = options
 
   const allowsSubclassInstances =
     typeof options.allowsSubclassInstances === "undefined"
@@ -14,8 +15,72 @@ function defineTypedProperty(obj, prop, options) {
 
   if (typeof type !== "function" && typeof type !== "string") {
     throw new Error(
-      `A 'type' property must be defined on the options object passed as the third argument to the \`defineTypedProperty\` function!`,
+      `A 'type' value (i.e., a class name or a string like "number" representing a primitive type) must be passed as the second argument to the \`defineTypedProperty\` function!`,
     )
+  }
+
+  if (type === null || typeof type === "undefined") {
+    throw new Error(
+      `A 'type' value (i.e., a class name or a string like "number" representing a primitive type) must be passed as the second argument to the \`defineTypedProperty\` function!`,
+    )
+  }
+
+  if (type === Array) {
+    throw new Error(
+      "It's not possible to create a property of type Array (though you *can* create a TypedArray property)!",
+    )
+  }
+
+  function getTypeString() {
+    if (typeof type === "function") {
+      return type.name
+    } else {
+      return type
+    }
+  }
+
+  function canAccept(value) {
+    if (type === Date && isDate(value)) {
+      return true
+    }
+
+    if (typeof value === "object") {
+      if (typeof type === "function") {
+        if (
+          value instanceof type &&
+          (allowsSubclassInstances ||
+            value.constructor.name === getTypeString())
+        ) {
+          return true
+        }
+
+        if (value instanceof constructor) {
+          return true
+        }
+
+        return false
+      } else if (value instanceof constructor) {
+        return true
+      } else {
+        return false
+      }
+    } else {
+      return typeof value === type
+    }
+  }
+
+  function challenge(value) {
+    if (canAccept(value)) {
+      return true
+    } else {
+      throw new Error(
+        `A TypedArray<${getTypeString()}> cannot accept the value: ${
+          typeof value === "string" || typeof value === "object"
+            ? JSON.stringify(value)
+            : value
+        }`,
+      )
+    }
   }
 
   Object.defineProperty(obj, prop, {
@@ -26,25 +91,7 @@ function defineTypedProperty(obj, prop, options) {
     },
 
     set(value) {
-      const message = `The '${prop}' property can only have ${
-        typeof type === "function" ? "`" + type.name + "`" : type
-      } values assigned to it!`
-
-      if (typeof value === "object") {
-        if (typeof type === "function") {
-          if (
-            !(value instanceof type) ||
-            (!allowsSubclassInstances && value.constructor.name !== type.name)
-          ) {
-            throw new Error(message)
-          }
-        } else {
-          throw new Error(message)
-        }
-      } else if (typeof value !== type) {
-        throw new Error(message)
-      }
-
+      challenge(value)
       _value = value
     },
   })
