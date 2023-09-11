@@ -51,9 +51,9 @@ class TypedArray extends Array {
       return true
     } else {
       throw new Error(
-        `The instance of TypedArray<${
+        `A TypedArray<${
           this.typeString
-        }> cannot accept this value: ${
+        }> cannot accept the value: ${
           typeof value === "string" ? JSON.stringify(value) : value
         }`
       )
