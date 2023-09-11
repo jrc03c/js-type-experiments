@@ -5,7 +5,11 @@ const { isDate } = require("@jrc03c/js-math-tools")
 // options can optionally include:
 // - allowsSubclassInstances
 function defineTypedProperty(obj, type, prop, options) {
-  options = options || {}
+  options = options || {
+    configurable: true,
+    enumerable: true,
+  }
+
   let _value
 
   const allowsSubclassInstances =
@@ -74,11 +78,7 @@ function defineTypedProperty(obj, type, prop, options) {
       return true
     } else {
       throw new Error(
-        `A TypedArray<${getTypeString()}> cannot accept the value: ${
-          typeof value === "string" || typeof value === "object"
-            ? JSON.stringify(value)
-            : value
-        }`,
+        `The '${prop}' property can only have ${getTypeString()} values assigned to it!`,
       )
     }
   }
