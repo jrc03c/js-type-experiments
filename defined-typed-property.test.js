@@ -1,3 +1,4 @@
+const createTypedArray = require("./create-typed-array")
 const defineTypedProperty = require("./define-typed-property")
 
 test("test that the `defineTypedProperty` function works as expected", () => {
@@ -47,10 +48,19 @@ test("test that the `defineTypedProperty` function works as expected", () => {
     defineTypedProperty({}, null, Math.random().toString()),
   ).toThrow()
 
-  // array array types
+  // array types
   expect(() =>
     defineTypedProperty({}, null, Math.random().toString()),
   ).toThrow()
+
+  // typed array types
+  expect(() => {
+    defineTypedProperty(
+      {},
+      createTypedArray("number").constructor,
+      Math.random().toString(),
+    )
+  }).not.toThrow()
 
   // object array types
   const x = {}
