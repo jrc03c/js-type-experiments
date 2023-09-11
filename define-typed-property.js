@@ -26,18 +26,23 @@ function defineTypedProperty(obj, prop, options) {
     },
 
     set(value) {
+      const message = `The '${prop}' property can only have ${
+        typeof type === "function" ? "`" + type.name + "`" : type
+      } values assigned to it!`
+
       if (typeof value === "object") {
-        if (
-          !(value instanceof type) ||
-          (!allowsSubclassInstances && value.constructor.name !== type.name)
-        ) {
-          throw new Error(
-            `The '${prop}' property can only have ${
-              typeof type === "function" ? "`" + type.name + "`" : type
-            } values assigned to it!`,
-          )
+        if (typeof type === "function") {
+          if (
+            !(value instanceof type) ||
+            (!allowsSubclassInstances && value.constructor.name !== type.name)
+          ) {
+            throw new Error(message)
+          }
+        } else {
+          throw new Error(message)
         }
-      } else {
+      } else if (typeof value !== type) {
+        throw new Error(message)
       }
 
       _value = value

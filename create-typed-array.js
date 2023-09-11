@@ -4,6 +4,12 @@ class TypedArray extends Array {
   constructor(type, allowsSubclassInstances) {
     super()
 
+    if (type === null || typeof type === "undefined") {
+      throw new Error(
+        `A type must be passed as the first argument to the \`createTypedArray\` function!`,
+      )
+    }
+
     Object.defineProperty(this, "type", {
       configurable: false,
       enumerable: false,
@@ -36,11 +42,15 @@ class TypedArray extends Array {
 
   canAccept(value) {
     if (typeof value === "object") {
-      return (
-        value instanceof this.type &&
-        (this.allowsSubclassInstances ||
-          value.constructor.name === this.typeString)
-      )
+      if (typeof type === "function") {
+        return (
+          value instanceof this.type &&
+          (this.allowsSubclassInstances ||
+            value.constructor.name === this.typeString)
+        )
+      } else {
+        return false
+      }
     } else {
       return typeof value === this.type
     }
