@@ -62,7 +62,7 @@ test("test that the `defineTypedProperty` function works as expected", () => {
     )
   }).not.toThrow()
 
-  // object array types
+  // object types
   const x = {}
   const prop = Math.random().toString()
   defineTypedProperty(x, Date, prop)
