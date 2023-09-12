@@ -41,6 +41,23 @@ test("test that the `createTypedArray` function works as expected", () => {
   expect(() => createTypedArray(undefined)).toThrow()
   expect(() => createTypedArray(null)).toThrow()
 
+  // appending undefined or null values to arrays of any type
+  expect(() => {
+    const x = createTypedArray("string")
+    x.push(undefined)
+    x.push(null)
+    x.push("foo")
+  }).not.toThrow()
+
+  // appending NaN to number arrays
+  expect(() => {
+    const x = createTypedArray("number")
+    x.push(undefined)
+    x.push(null)
+    x.push(NaN)
+    x.push(234)
+  }).not.toThrow()
+
   // array array types
   expect(() => createTypedArray(Array)).toThrow()
 

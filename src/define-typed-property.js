@@ -44,6 +44,14 @@ function defineTypedProperty(obj, type, prop, options) {
   }
 
   function canAccept(value) {
+    if (value === null || typeof value === "undefined") {
+      return true
+    }
+
+    if (this.type === "number" && typeof value === "number" && isNaN(value)) {
+      return true
+    }
+
     if (type === Date && isDate(value)) {
       return true
     }

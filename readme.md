@@ -41,3 +41,7 @@ The `type` argument works the same as in the `createTypedArray` function above.
 The `property` argument must be a string representing the name of the property to be created.
 
 The `options` argument here is actually the same as the options argument passed into [`Object.defineProperty`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty) (called `descriptor` in the MDN docs) with only one addition: it can optionally take an `"allowsSubclassInstances"` property that must be a boolean. That property has the same functionality as in the `createTypedArray` function above.
+
+# Notes
+
+**`NaN`, `null`, and `undefined` values:** Arrays and properties of any type will accept `null` and `undefined` values without throwing errors. Number arrays and number properties will also accept `NaN` values.

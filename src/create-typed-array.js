@@ -46,6 +46,14 @@ class TypedArray extends Array {
   }
 
   canAccept(value) {
+    if (value === null || typeof value === "undefined") {
+      return true
+    }
+
+    if (this.type === "number" && typeof value === "number" && isNaN(value)) {
+      return true
+    }
+
     if (this.type === Date && isDate(value)) {
       return true
     }

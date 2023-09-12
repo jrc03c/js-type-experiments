@@ -48,6 +48,25 @@ test("test that the `defineTypedProperty` function works as expected", () => {
     defineTypedProperty({}, null, Math.random().toString()),
   ).toThrow()
 
+  // setting undefined or null values on typed properties
+  expect(() => {
+    const x = {}
+    defineTypedProperty(x, "string", "foo")
+    x.foo = undefined
+    x.foo = null
+    x.foo = "bar"
+  }).not.toThrow()
+
+  // setting NaN on number properties
+  expect(() => {
+    const x = {}
+    defineTypedProperty(x, "number", "foo")
+    x.foo = undefined
+    x.foo = null
+    x.foo = NaN
+    x.foo = 234
+  }).not.toThrow()
+
   // array types
   expect(() =>
     defineTypedProperty({}, null, Math.random().toString()),
