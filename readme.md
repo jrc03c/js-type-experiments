@@ -12,9 +12,14 @@ npm install --save https://github.com/jrc03c/js-type-experiments
 
 ```js
 const {
+  createType,
   createTypedArray,
   defineTypedProperty,
 } = require("@jrc03c/js-type-experiments")
+
+const fooType = createType("Foo", v => v === "foo")
+console.log("foo" instanceof fooType) // true
+console.log("bar" instanceof fooType) // false
 
 const myNumbers = createTypedArray("number")
 myNumbers.push(234) // okay
@@ -27,6 +32,29 @@ person.name = true // error
 ```
 
 # API
+
+## `createType(name, fn)`
+
+Creates a custom type defined by a pass / fail function.
+
+A concrete example might make the purpose of this function a little clearer. Suppose we want to create an array of non-negative integers. Using the `createTypedArray` function below, we could try something like this:
+
+```js
+const x = createTypedArray("number")
+```
+
+But the problem, of course, is that `x` would accept _any_ number, not just non-negative integers. And that's where the `createType` function comes to the rescue. It allows us to define a custom type without creating a whole new class (which is especially helpful for primitive values that don't use classes) merely by passing a name and a test function that tests each value to determine whether it's a member of that type or not. So, to create an array of non-negative integers, we could do something like this:
+
+```js
+function isANonNegativeInteger(x) {
+  return typeof x === "number" && x >= 0 && Math.floor(x) === x
+}
+
+const nonNegativeIntegerType = createType("NonNegInt", isANonNegativeInteger)
+const x = createTypedArray(nonNegativeIntegerType)
+x.push(234) // okay
+x.push(-234) // error
+```
 
 ## `createTypedArray(type, allowsSubclassInstances)`
 
@@ -45,3 +73,13 @@ The `options` argument here is actually the same as the options argument passed 
 # Notes
 
 **`NaN`, `null`, and `undefined` values:** Arrays and properties of any type will accept `null` and `undefined` values without throwing errors. Number arrays and number properties will also accept `NaN` values.
+
+**Nested typed arrays:** Typed arrays can be nested, but the syntax is a little cumbersome right now. To create (for example) a nested string array, you'd have to do something like this:
+
+```js
+const outer = createTypedArray("string")
+outer.push("a", "b", "c")
+
+const inner = createTypedArray("string")
+outer.push(inner)
+```

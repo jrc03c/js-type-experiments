@@ -58,16 +58,20 @@ class TypedArray extends Array {
       return true
     }
 
+    try {
+      if (
+        value instanceof this.type &&
+        (this.allowsSubclassInstances ||
+          value.constructor.name === this.typeString)
+      ) {
+        return true
+      }
+    } catch (e) {
+      // ...
+    }
+
     if (typeof value === "object") {
       if (typeof this.type === "function") {
-        if (
-          value instanceof this.type &&
-          (this.allowsSubclassInstances ||
-            value.constructor.name === this.typeString)
-        ) {
-          return true
-        }
-
         if (value instanceof this.constructor) {
           return true
         }
