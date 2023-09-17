@@ -24,7 +24,7 @@ test("test that the `defineTypedProperty` function works as expected", () => {
   for (const value of primitives) {
     const x = {}
     const prop = Math.random().toString()
-    defineTypedProperty(x, typeof value, prop)
+    defineTypedProperty(x, prop, typeof value)
 
     for (const other of primitives) {
       let failed = false
@@ -41,17 +41,17 @@ test("test that the `defineTypedProperty` function works as expected", () => {
 
   // undefined types
   expect(() =>
-    defineTypedProperty({}, undefined, Math.random().toString()),
+    defineTypedProperty({}, Math.random().toString(), undefined),
   ).toThrow()
 
   expect(() =>
-    defineTypedProperty({}, null, Math.random().toString()),
+    defineTypedProperty({}, Math.random().toString(), null),
   ).toThrow()
 
   // setting undefined or null values on typed properties
   expect(() => {
     const x = {}
-    defineTypedProperty(x, "string", "foo")
+    defineTypedProperty(x, "foo", "string")
     x.foo = undefined
     x.foo = null
     x.foo = "bar"
@@ -60,7 +60,7 @@ test("test that the `defineTypedProperty` function works as expected", () => {
   // setting NaN on number properties
   expect(() => {
     const x = {}
-    defineTypedProperty(x, "number", "foo")
+    defineTypedProperty(x, "foo", "number")
     x.foo = undefined
     x.foo = null
     x.foo = NaN
@@ -69,22 +69,22 @@ test("test that the `defineTypedProperty` function works as expected", () => {
 
   // array types
   expect(() =>
-    defineTypedProperty({}, null, Math.random().toString()),
+    defineTypedProperty({}, Math.random().toString(), null),
   ).toThrow()
 
   // typed array types
   expect(() => {
     defineTypedProperty(
       {},
-      createTypedArray("number").constructor,
       Math.random().toString(),
+      createTypedArray("number").constructor,
     )
   }).not.toThrow()
 
   // object types
   const x = {}
   const prop = Math.random().toString()
-  defineTypedProperty(x, Date, prop)
+  defineTypedProperty(x, prop, Date)
   x[prop] = new Date()
   x[prop] = new Date(new Date().getTime() + 1000)
 
@@ -118,7 +118,7 @@ test("test that the `defineTypedProperty` function works as expected", () => {
   const bob = new Employee("Bob", 45, "Transpondster")
   const x2 = {}
   const prop2 = Math.random().toString()
-  defineTypedProperty(x2, Person, prop2)
+  defineTypedProperty(x2, prop2, Person)
 
   x2[prop2] = alice
   x2[prop2] = bob
@@ -136,7 +136,7 @@ test("test that the `defineTypedProperty` function works as expected", () => {
   }
 
   const prop3 = Math.random().toString()
-  defineTypedProperty(x2, Person, prop3, { allowsSubclassInstances: false })
+  defineTypedProperty(x2, prop3, Person, { allowsSubclassInstances: false })
 
   x2[prop3] = alice
 
@@ -145,7 +145,7 @@ test("test that the `defineTypedProperty` function works as expected", () => {
   }).toThrow()
 
   const prop4 = Math.random().toString()
-  defineTypedProperty(x2, Employee, prop4)
+  defineTypedProperty(x2, prop4, Employee)
 
   x2[prop4] = bob
 
@@ -154,7 +154,7 @@ test("test that the `defineTypedProperty` function works as expected", () => {
   }).toThrow()
 
   const prop5 = Math.random().toString()
-  defineTypedProperty(x, Object, prop5)
+  defineTypedProperty(x, prop5, Object)
 
   x2[prop5] = alice
   x2[prop5] = bob

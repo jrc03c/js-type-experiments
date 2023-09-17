@@ -4,7 +4,7 @@ const { isDate } = require("@jrc03c/js-math-tools")
 // - type
 // options can optionally include:
 // - allowsSubclassInstances
-function defineTypedProperty(obj, type, prop, options) {
+function defineTypedProperty(obj, prop, type, options) {
   options = options || {
     configurable: true,
     enumerable: true,
@@ -19,13 +19,13 @@ function defineTypedProperty(obj, type, prop, options) {
 
   if (typeof type !== "function" && typeof type !== "string") {
     throw new Error(
-      `A 'type' value (i.e., a class name or a string like "number" representing a primitive type) must be passed as the second argument to the \`defineTypedProperty\` function!`,
+      `A 'type' value (i.e., a class name or a string like "number" representing a primitive type) must be passed as the third argument to the \`defineTypedProperty\` function!`,
     )
   }
 
   if (type === null || typeof type === "undefined") {
     throw new Error(
-      `A 'type' value (i.e., a class name or a string like "number" representing a primitive type) must be passed as the second argument to the \`defineTypedProperty\` function!`,
+      `A 'type' value (i.e., a class name or a string like "number" representing a primitive type) must be passed as the third argument to the \`defineTypedProperty\` function!`,
     )
   }
 
