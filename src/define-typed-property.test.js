@@ -1,3 +1,4 @@
+const createType = require("./create-type")
 const createTypedArray = require("./create-typed-array")
 const defineTypedProperty = require("./define-typed-property")
 
@@ -159,4 +160,52 @@ test("test that the `defineTypedProperty` function works as expected", () => {
   x2[prop5] = alice
   x2[prop5] = bob
   x2[prop5] = { hello: "world" }
+
+  class CustomNumber {
+    constructor() {
+      defineTypedProperty(this, "value", "number")
+      this.value = 0
+    }
+  }
+
+  const x3 = new CustomNumber()
+  expect(x3.value).toBe(0)
+  x3.value = 42
+  expect(x3.value).toBe(42)
+
+  expect(() => {
+    x3.value = "Hello, world!"
+  }).toThrow()
+
+  class PrimeNumber {
+    static check(x) {
+      if (x < 2) {
+        return false
+      }
+
+      for (let n = 2; n <= Math.sqrt(x); n++) {
+        if (x % n === 0) {
+          return false
+        }
+      }
+
+      return true
+    }
+
+    constructor(v) {
+      const primeNumberType = createType("prime number", PrimeNumber.check)
+      defineTypedProperty(this, "value", primeNumberType)
+      this.value = v || undefined
+    }
+  }
+
+  const p = new PrimeNumber()
+  expect(typeof p.value).toBe("undefined")
+  expect(PrimeNumber.check(13)).toBe(true)
+  p.value = 13
+  expect(p.value).toBe(13)
+
+  expect(() => {
+    p.value = 16
+  }).toThrow()
 })

@@ -2,6 +2,12 @@ const out = {
   createType: require("./create-type"),
   createTypedArray: require("./create-typed-array"),
   defineTypedProperty: require("./define-typed-property"),
+
+  dump() {
+    Object.keys(out).forEach(key => {
+      globalThis[key] = out[key]
+    })
+  },
 }
 
 if (typeof module !== "undefined") {
@@ -9,7 +15,5 @@ if (typeof module !== "undefined") {
 }
 
 if (typeof globalThis !== "undefined") {
-  Object.keys(out).forEach(key => {
-    globalThis[key] = out[key]
-  })
+  out.dump()
 }

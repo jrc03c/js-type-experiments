@@ -14,6 +14,12 @@ function createType(name, fn) {
   }
 
   const out = class {
+    constructor() {
+      throw new Error(
+        "This class is not meant to be instantiated or subclassed! Its only purpose is type checking.",
+      )
+    }
+
     static [Symbol.hasInstance](value) {
       try {
         return !!fn(value)

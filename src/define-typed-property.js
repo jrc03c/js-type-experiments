@@ -56,27 +56,12 @@ function defineTypedProperty(obj, prop, type, options) {
       return true
     }
 
-    if (typeof value === "object") {
-      if (typeof type === "function") {
-        if (
-          value instanceof type &&
-          (allowsSubclassInstances ||
-            value.constructor.name === getTypeString())
-        ) {
-          return true
-        }
-
-        if (value instanceof constructor) {
-          return true
-        }
-
-        return false
-      } else if (value instanceof constructor) {
-        return true
-      } else {
-        return false
-      }
-    } else {
+    try {
+      return (
+        value instanceof type &&
+        (allowsSubclassInstances || value.constructor.name === type.name)
+      )
+    } catch (e) {
       return typeof value === type
     }
   }
