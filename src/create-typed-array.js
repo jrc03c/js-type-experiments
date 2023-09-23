@@ -139,7 +139,7 @@ function createTypedArray(type, allowsSubclassInstances) {
     configurable: false,
     enumerable: false,
     writable: false,
-    value: `${pascalify(out.typeString)}TypedArray`,
+    value: `${pascalify(out.typeString)}Array`,
   })
 
   return new Proxy(out, {
