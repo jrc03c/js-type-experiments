@@ -1,3 +1,4 @@
+const { isEqual, range } = require("@jrc03c/js-math-tools")
 const createTypedArray = require("./create-typed-array")
 
 test("test that the `createTypedArray` function works as expected", () => {
@@ -130,4 +131,86 @@ test("test that the `createTypedArray` function works as expected", () => {
   x.push(2, 3, 4)
   y.push(5, 6, 7)
   x.push(y)
+
+  // other methods
+  const StringArray = createTypedArray("string").constructor
+  const a = StringArray.from(["a", "b", "c"])
+  expect(a.constructor.name).toBe("StringArray")
+  expect(isEqual(a, ["a", "b", "c"])).toBe(true)
+  expect(() => a.push(234)).toThrow()
+
+  class Foo {
+    constructor(value) {
+      this.value = value
+    }
+  }
+
+  const dTrue = range(0, 6).map(v => new Foo(v))
+  const b = createTypedArray(Foo).from(dTrue.slice(0, 3))
+  const c = createTypedArray(Foo).from(dTrue.slice(3))
+  const dPred = b.concat(c)
+  expect(isEqual(dTrue, dPred)).toBe(true)
+  expect(dPred.type).toBe(b.type)
+  expect(dPred.constructor.name).toBe("FooArray")
+
+  const e = createTypedArray("number").from([2, 3, 4])
+  e.fill(234, 0, 2)
+  expect(isEqual(e, [234, 234, 4])).toBe(true)
+  expect(e.type).toBe("number")
+  expect(e.constructor.name).toBe("NumberArray")
+
+  const gTrue = [4, 6, 8]
+  const f = createTypedArray("number").from([2, 3, 4])
+  const gPred = f.map(v => v * 2)
+  expect(isEqual(gTrue, gPred)).toBe(true)
+  expect(gPred.type).toBe(f.type)
+  expect(gPred.constructor.name).toBe("NumberArray")
+
+  const h = f.map(v => v.toString())
+  expect(isEqual(h, ["2", "3", "4"])).toBe(true)
+  expect(h instanceof f.constructor).toBe(false)
+
+  expect(f.slice() instanceof f.constructor).toBe(true)
+  expect(f.slice(0, 1) instanceof f.constructor).toBe(true)
+
+  const i = f.toReversed()
+  expect(i instanceof f.constructor).toBe(true)
+
+  expect(
+    i.forEach((v, j) => {
+      expect(isEqual(v, f.at(-j - 1))).toBe(true)
+    }),
+  )
+
+  const j = createTypedArray("string").from(["c", "a", "b"])
+  const k = j.toSorted()
+  expect(k instanceof j.constructor).toBe(true)
+  expect(isEqual(k, ["a", "b", "c"])).toBe(true)
+  const l = j.toSorted((a, b) => (b < a ? -1 : 1))
+  expect(l instanceof j.constructor).toBe(true)
+  expect(isEqual(l, ["c", "b", "a"])).toBe(true)
+  j.sort()
+  expect(isEqual(j, k)).toBe(true)
+  j.sort((a, b) => (b < a ? -1 : 1))
+  expect(isEqual(j, l)).toBe(true)
+
+  const m = createTypedArray("symbol").from([
+    Symbol.for("yes"),
+    Symbol.for("no"),
+    Symbol.for("maybe-so"),
+  ])
+
+  const n = m.toSpliced(0, 1, Symbol.for("hell no"))
+  m.splice(0, 1, Symbol.for("hell no"))
+  expect(isEqual(m, n)).toBe(true)
+  expect(n instanceof m.constructor).toBe(true)
+
+  const o = createTypedArray("number").from([2, 3, 4])
+  o.unshift(5, 6, 7)
+  expect(isEqual(o, [5, 6, 7, 2, 3, 4])).toBe(true)
+
+  const p = createTypedArray("number").from([2, 3, 4])
+  const q = p.with(1, 234)
+  expect(isEqual(q, [2, 234, 4])).toBe(true)
+  expect(q instanceof p.constructor).toBe(true)
 })
