@@ -10,7 +10,7 @@
     "prettier": "^3.0.3"
   },
   "name": "@jrc03c/js-type-experiments",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "src/index.js",
   "scripts": {
     "build": "esbuild src/index.js --bundle --outfile=dist/js-type-experiments.js --minify",
