@@ -70,6 +70,31 @@ The `type` argument works the same as in the `createTypedArray` function above.
 
 The `options` argument here is actually the same as the options argument passed into [`Object.defineProperty`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty) (called `descriptor` in the MDN docs) with only one addition: it can optionally take an `"allowsSubclassInstances"` property that must be a boolean. That property has the same functionality as in the `createTypedArray` function above.
 
+By the way, here's a useful little recipe if you need to define a property whose type is a typed array. For example, in a class called `Person`, there might be a property called `nicknames` that's an array of strings. To define such a property, do this:
+
+```js
+const {
+  createTypedArray,
+  defineTypedProperty,
+} = require("@jrc03c/js-type-experiments")
+
+class Person {
+  constructor() {
+    // ...
+
+    defineTypedProperty(
+      this,
+      "nicknames",
+      createTypedArray("string").constructor,
+    )
+
+    // ...
+  }
+}
+```
+
+In other words, we create a temporary typed array using the `createTypedArray` function, specifying `"string"` as the type, and then immediately use the `constructor` of that array since that's the "type" of value — i.e., the `StringArray` type — that the property `nicknames` should accept.
+
 # Notes
 
 **`NaN`, `null`, and `undefined` values:** Arrays and properties of any type will accept `null` and `undefined` values without throwing errors. Number arrays and number properties will also accept `NaN` values.
