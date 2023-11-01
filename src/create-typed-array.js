@@ -1,4 +1,4 @@
-const { isDate } = require("@jrc03c/js-math-tools")
+const { flatten, isArray, isDate } = require("@jrc03c/js-math-tools")
 const { pascalify } = require("@jrc03c/js-text-tools")
 
 class TypedArray extends Array {
@@ -73,6 +73,11 @@ class TypedArray extends Array {
   }
 
   canAccept(value) {
+    if (isArray(value)) {
+      const temp = flatten(value)
+      return temp.every(v => this.canAccept(v))
+    }
+
     if (value === null || typeof value === "undefined") {
       return true
     }

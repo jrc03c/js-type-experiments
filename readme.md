@@ -98,13 +98,3 @@ In other words, we create a temporary typed array using the `createTypedArray` f
 # Notes
 
 **`NaN`, `null`, and `undefined` values:** Arrays and properties of any type will accept `null` and `undefined` values without throwing errors. Number arrays and number properties will also accept `NaN` values.
-
-**Nested typed arrays:** Typed arrays can be nested, but the syntax is a little cumbersome right now. To create (for example) a nested string array, you'd have to do something like this:
-
-```js
-const outer = createTypedArray("string")
-outer.push("a", "b", "c")
-
-const inner = createTypedArray("string")
-outer.push(inner)
-```

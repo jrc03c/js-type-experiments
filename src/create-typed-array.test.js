@@ -132,6 +132,12 @@ test("test that the `createTypedArray` function works as expected", () => {
   y.push(5, 6, 7)
   x.push(y)
 
+  // nested arrays (v2)
+  const z = createTypedArray("string")
+  z.push("a", "b", "c")
+  z.push(["d", ["e", ["f"]]])
+  expect(() => z.push(234)).toThrow()
+
   // other methods
   const StringArray = createTypedArray("string").constructor
   const a = StringArray.from(["a", "b", "c"])
