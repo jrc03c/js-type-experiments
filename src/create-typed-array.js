@@ -32,13 +32,33 @@ class TypedArray extends Array {
 
     arr.forEach(value => {
       if (this.isArray(value)) {
-        out.push(this.from(value))
+        const temp = new this(true)
+        value.forEach(v => temp.push(v))
+        out.push(this.proxify(temp))
       } else {
         out.push(value)
       }
     })
 
     return out
+  }
+
+  static proxify(x) {
+    return new Proxy(x, {
+      get() {
+        return Reflect.get(...arguments)
+      },
+
+      set(target, prop, value, receiver) {
+        const intProp = parseInt(prop)
+
+        if (!isNaN(intProp) && parseFloat(prop) === intProp && intProp >= 0) {
+          receiver.challenge(value)
+        }
+
+        return Reflect.set(...arguments)
+      },
+    })
   }
 
   constructor(type, allowsSubclassInstances) {
@@ -223,8 +243,14 @@ function createTypedArray(type, allowsSubclassInstances) {
       return TypedArray.registry[key][type]
     } else {
       class Temp extends TypedArray {
-        constructor() {
+        constructor(quiet) {
           super(type, allowsSubclassInstances)
+
+          if (!quiet) {
+            throw new Error(
+              `New \`${this.constructor.name}\` instances cannot be created using the \`new\` keyword! They must be created using \`${this.constructor.name}.from([...])\`.`,
+            )
+          }
         }
       }
 
@@ -233,7 +259,7 @@ function createTypedArray(type, allowsSubclassInstances) {
     }
   })()
 
-  const out = new TempClass(type, allowsSubclassInstances)
+  const out = new TempClass(true)
 
   Object.defineProperty(out.constructor, "name", {
     configurable: false,
@@ -257,22 +283,7 @@ function createTypedArray(type, allowsSubclassInstances) {
   })
 
   TypedArray.registry[key][out.constructor.name] = type
-
-  return new Proxy(out, {
-    get() {
-      return Reflect.get(...arguments)
-    },
-
-    set(target, prop, value, receiver) {
-      const intProp = parseInt(prop)
-
-      if (!isNaN(intProp) && parseFloat(prop) === intProp && intProp >= 0) {
-        receiver.challenge(value)
-      }
-
-      return Reflect.set(...arguments)
-    },
-  })
+  return TypedArray.proxify(out)
 }
 
 module.exports = createTypedArray
