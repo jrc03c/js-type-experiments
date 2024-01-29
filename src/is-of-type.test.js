@@ -1,4 +1,5 @@
 const createType = require("./create-type")
+const createTypedArray = require("./create-typed-array")
 const isOfType = require("./is-of-type")
 
 test("tests that the `isOfType` function works as expected", () => {
@@ -315,4 +316,49 @@ test("tests that the `isOfType` function works as expected", () => {
       expect(isOfType(pair[0], type)).toBe(false)
     }
   }
+
+  // check typed arrays
+  class Person {
+    name = null
+    age = null
+
+    constructor(name, age) {
+      this.name = name
+      this.age = age
+    }
+  }
+
+  const strings = createTypedArray("string")
+  const StringArray = strings.constructor
+  strings.push("a", "b", "c")
+
+  const symbols = createTypedArray("symbol")
+  const SymbolArray = symbols.constructor
+  symbols.push(Symbol.for("foo"), Symbol.for("bar"), Symbol.for("baz"))
+
+  const people = createTypedArray(Person)
+  const PersonArray = people.constructor
+
+  people.push(
+    new Person("Alice", 23),
+    new Person("Bob", 45),
+    new Person("Cecilia", 67),
+  )
+
+  expect(isOfType(strings, StringArray)).toBe(true)
+  expect(isOfType(strings, Array)).toBe(true)
+  expect(isOfType(strings, SymbolArray)).toBe(false)
+  expect(isOfType(strings, PersonArray)).toBe(false)
+
+  expect(isOfType(symbols, SymbolArray)).toBe(true)
+  expect(isOfType(symbols, Array)).toBe(true)
+  expect(isOfType(symbols, StringArray)).toBe(false)
+  expect(isOfType(symbols, PersonArray)).toBe(false)
+
+  expect(isOfType(people, PersonArray)).toBe(true)
+  expect(isOfType(people, Array)).toBe(true)
+  expect(isOfType(people, StringArray)).toBe(false)
+  expect(isOfType(people, SymbolArray)).toBe(false)
+
+  // check subclasses
 })
