@@ -2,6 +2,11 @@ const { flatten, isArray } = require("@jrc03c/js-math-tools")
 const { pascalify } = require("@jrc03c/js-text-tools")
 const isOfType = require("./is-of-type")
 
+const canUseNewKeyword = {
+  allowsSubclassInstances: {},
+  doesNotAllowSubclassInstances: {},
+}
+
 class TypedArray extends Array {
   static allowsSubclassInstances = true
 
@@ -30,9 +35,20 @@ class TypedArray extends Array {
 
     const out = createTypedArray(TypedArray.registry[key][this.name])
 
+    if (arguments.length === 0) {
+      return out
+    }
+
     arr.forEach(value => {
       if (this.isArray(value)) {
-        const temp = new this(true)
+        const key = this.allowsSubclassInstances
+          ? "allowsSubclassInstances"
+          : "doesNotAllowSubclassInstances"
+
+        canUseNewKeyword[key][this.type] = true
+        const temp = new this()
+        canUseNewKeyword[key][this.type] = false
+
         value.forEach(v => temp.push(v))
         out.push(this.proxify(temp))
       } else {
@@ -104,6 +120,14 @@ class TypedArray extends Array {
     }
   }
 
+  get allowsSubclassInstances() {
+    return this.constructor.allowsSubclassInstances
+  }
+
+  get type() {
+    return this.constructor.type
+  }
+
   canAccept(value) {
     return (
       isOfType(
@@ -154,7 +178,13 @@ class TypedArray extends Array {
   }
 
   map(fn, thisArg) {
-    const out = super.map(fn, thisArg)
+    if (typeof thisArg !== "undefined") {
+      fn = fn.bind(thisArg)
+    } else {
+      fn = fn.bind(this)
+    }
+
+    const out = Array.from(this).map(fn)
 
     try {
       return this.constructor.from(out)
@@ -171,31 +201,50 @@ class TypedArray extends Array {
     return super.push(...arguments)
   }
 
-  slice() {
-    const out = createTypedArray(
-      this.constructor.type,
-      this.constructor.allowsSubclassInstances,
-    )
+  slice(start, end) {
+    if (!start) {
+      start = 0
+    }
 
-    out.push(...super.slice(...arguments))
+    if (!end) {
+      end = this.length
+    }
+
+    const out = this.constructor.from([])
+
+    for (let i = start; i < end; i++) {
+      out.push(this[i])
+    }
+
     return out
   }
 
   splice() {
-    Array.from(arguments)
+    const newValues = Array.from(arguments)
       .slice(2)
-      .forEach(value => {
-        this.challenge(value)
+      .filter(v => {
+        this.challenge(v)
+        return true
       })
 
-    return super.splice(...arguments)
+    const difference = newValues.length - arguments[1]
+    const newLength = this.length + difference
+
+    for (let i = newLength - 1; i > arguments[0] + arguments[1]; i--) {
+      this[i] = this[i - difference]
+    }
+
+    const removed = this.slice(arguments[0], arguments[0] + arguments[1])
+
+    newValues.forEach((v, i) => {
+      this[arguments[0] + i] = v
+    })
+
+    return removed
   }
 
   toReversed() {
-    const out = createTypedArray(
-      this.constructor.type,
-      this.constructor.allowsSubclassInstances,
-    )
+    const out = this.constructor.from([])
 
     for (let i = this.length - 1; i >= 0; i--) {
       out.push(this[i])
@@ -243,10 +292,10 @@ function createTypedArray(type, allowsSubclassInstances) {
       return TypedArray.registry[key][type]
     } else {
       class Temp extends TypedArray {
-        constructor(quiet) {
+        constructor() {
           super(type, allowsSubclassInstances)
 
-          if (!quiet) {
+          if (!canUseNewKeyword[key][type]) {
             throw new Error(
               `New \`${this.constructor.name}\` instances cannot be created using the \`new\` keyword! They must be created using \`${this.constructor.name}.from([...])\`.`,
             )
@@ -259,7 +308,9 @@ function createTypedArray(type, allowsSubclassInstances) {
     }
   })()
 
+  canUseNewKeyword[key][type] = true
   const out = new TempClass(true)
+  canUseNewKeyword[key][type] = false
 
   Object.defineProperty(out.constructor, "name", {
     configurable: false,
