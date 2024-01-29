@@ -3,7 +3,14 @@ const { pascalify } = require("@jrc03c/js-text-tools")
 const isOfType = require("./is-of-type")
 
 class TypedArray extends Array {
-  static registry = {}
+  static allowsSubclassInstances = true
+
+  static registry = {
+    allowsSubclassInstances: {},
+    doesNotAllowSubclassInstances: {},
+  }
+
+  static type = null
 
   static from(arr) {
     // NOTE: This implementation is intentionally different from the
@@ -17,7 +24,11 @@ class TypedArray extends Array {
       )
     }
 
-    const out = createTypedArray(TypedArray.registry[this.name])
+    const key = this.allowsSubclassInstances
+      ? "allowsSubclassInstances"
+      : "doesNotAllowSubclassInstances"
+
+    const out = createTypedArray(TypedArray.registry[key][this.name])
 
     arr.forEach(value => {
       if (this.isArray(value)) {
@@ -65,17 +76,21 @@ class TypedArray extends Array {
     })
   }
 
-  get typeString() {
-    if (typeof this.type === "function") {
-      return this.type.name
+  static get typeString() {
+    if (typeof this.constructor.type === "function") {
+      return this.constructor.type.name
     } else {
-      return this.type
+      return this.constructor.type
     }
   }
 
   canAccept(value) {
     return (
-      isOfType(value, this.type, this.allowsSubclassInstances) ||
+      isOfType(
+        value,
+        this.constructor.type,
+        this.constructor.allowsSubclassInstances,
+      ) ||
       (isArray(value) &&
         (value instanceof this.constructor ||
           flatten(value).every(v => this.canAccept(v))))
@@ -137,7 +152,11 @@ class TypedArray extends Array {
   }
 
   slice() {
-    const out = createTypedArray(this.type, this.allowsSubclassInstances)
+    const out = createTypedArray(
+      this.constructor.type,
+      this.constructor.allowsSubclassInstances,
+    )
+
     out.push(...super.slice(...arguments))
     return out
   }
@@ -153,7 +172,10 @@ class TypedArray extends Array {
   }
 
   toReversed() {
-    const out = createTypedArray(this.type, this.allowsSubclassInstances)
+    const out = createTypedArray(
+      this.constructor.type,
+      this.constructor.allowsSubclassInstances,
+    )
 
     for (let i = this.length - 1; i >= 0; i--) {
       out.push(this[i])
@@ -190,12 +212,23 @@ class TypedArray extends Array {
 }
 
 function createTypedArray(type, allowsSubclassInstances) {
+  const key = allowsSubclassInstances
+    ? "allowsSubclassInstances"
+    : "doesNotAllowSubclassInstances"
+
+  const typeString = typeof type === "function" ? type.name : type
+
   const TempClass = (() => {
-    if (TypedArray.registry[type]) {
-      return TypedArray.registry[type]
+    if (TypedArray.registry[key][type]) {
+      return TypedArray.registry[key][type]
     } else {
-      class Temp extends TypedArray {}
-      TypedArray.registry[type] = Temp
+      class Temp extends TypedArray {
+        constructor() {
+          super(type, allowsSubclassInstances)
+        }
+      }
+
+      TypedArray.registry[key][type] = Temp
       return Temp
     }
   })()
@@ -206,10 +239,24 @@ function createTypedArray(type, allowsSubclassInstances) {
     configurable: false,
     enumerable: false,
     writable: false,
-    value: `${pascalify(out.typeString)}Array`,
+    value: `${pascalify(typeString)}Array`,
   })
 
-  TypedArray.registry[out.constructor.name] = type
+  Object.defineProperty(TempClass, "allowsSubclassInstances", {
+    configurable: true,
+    enumerable: true,
+    writable: false,
+    value: allowsSubclassInstances,
+  })
+
+  Object.defineProperty(TempClass, "type", {
+    configurable: true,
+    enumerable: true,
+    writable: false,
+    value: type,
+  })
+
+  TypedArray.registry[key][out.constructor.name] = type
 
   return new Proxy(out, {
     get() {

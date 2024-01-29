@@ -1,5 +1,6 @@
 const { isEqual, range } = require("@jrc03c/js-math-tools")
 const createTypedArray = require("./create-typed-array")
+const isOfType = require("./is-of-type")
 
 test("test that the `createTypedArray` function works as expected", () => {
   // primitive array types
@@ -219,4 +220,20 @@ test("test that the `createTypedArray` function works as expected", () => {
   const q = p.with(1, 234)
   expect(isEqual(q, [2, 234, 4])).toBe(true)
   expect(q instanceof p.constructor).toBe(true)
+
+  // array types that allow and don't allow subclasses should be considered to
+  // be different types!
+  const r = createTypedArray(Person, true)
+  const PersonAndSubclassesArray = r.constructor
+  const s = createTypedArray(Person, false)
+  const PersonOnlyArray = s.constructor
+
+  expect(r instanceof PersonAndSubclassesArray).toBe(true)
+  expect(r instanceof PersonOnlyArray).toBe(false)
+  expect(isOfType(r, PersonAndSubclassesArray)).toBe(true)
+  expect(isOfType(r, personOnlyArray)).toBe(false)
+  expect(s instanceof PersonAndSubclassesArray).toBe(false)
+  expect(s instanceof PersonOnlyArray).toBe(true)
+  expect(isOfType(s, PersonAndSubclassesArray)).toBe(false)
+  expect(isOfType(s, PersonOnlyArray)).toBe(true)
 })
