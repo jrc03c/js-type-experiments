@@ -102,6 +102,8 @@ const y = createTypedArray("number")
 x.constructor === y.constructor // true
 ```
 
+> **NOTE:** Another limitation of typed arrays is that they can't be subclassed. That functionality is on my to-do list, but I haven't gotten to it yet!
+
 ## `defineTypedProperty(object, property, type, options)`
 
 The `property` argument must be a string representing the name of the property to be created.

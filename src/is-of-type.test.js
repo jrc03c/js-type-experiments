@@ -46,7 +46,7 @@ test("tests that the `isOfType` function works as expected", () => {
     expect(isOfType(pair[0], pair[1])).toBe(true)
   }
 
-  // check custom number types
+  // check custom types
   const WholeNumber = createType(
     "WholeNumber",
     v => typeof v === "number" && !isNaN(v) && v >= 0 && Math.floor(v) === v,
@@ -65,6 +65,14 @@ test("tests that the `isOfType` function works as expected", () => {
   expect(isOfType(-234, NaturalNumber)).toBe(false)
   expect(isOfType(234.567, WholeNumber)).toBe(false)
   expect(isOfType(234.567, NaturalNumber)).toBe(false)
+
+  const JoshStringType = createType(
+    "JoshStringType",
+    v => typeof v === "string" && v === "Josh",
+  )
+
+  expect(isOfType("Josh", JoshStringType)).toBe(true)
+  expect(isOfType("Alice", JoshStringType)).toBe(false)
 
   // check any type
   const AnyType = createType("Any", () => true)
@@ -319,9 +327,6 @@ test("tests that the `isOfType` function works as expected", () => {
 
   // check typed arrays
   class Person {
-    name = null
-    age = null
-
     constructor(name, age) {
       this.name = name
       this.age = age
@@ -361,27 +366,16 @@ test("tests that the `isOfType` function works as expected", () => {
   expect(isOfType(people, SymbolArray)).toBe(false)
 
   // check subclasses
-  // NOTE: passing `false` as the second argument to the `createTypedArray`
-  // function to indicate that subclasses aren't allows should yield the same
-  // behavior as passing `false` as the third argument to the `isOfType`
-  // function!
   class Employee extends Person {
-    title = null
-
     constructor(name, age, title) {
       super(name, age)
       this.title = title
     }
   }
 
-  const employees = createTypedArray(Employee)
-  const EmployeeArray = employees.constructor
-  expect(isOfType(employees, EmployeeArray, false)).toBe(true)
-  expect(isOfType(employees, PersonArray, false)).toBe(false)
-  expect(isOfType(employees, Array, false)).toBe(true)
-
-  const employees2 = createTypedArray(Employee, false)
-  expect(isOfType(employees2, EmployeeArray)).toBe(true)
-  expect(isOfType(employees2, PersonArray)).toBe(false)
-  expect(isOfType(employees2, Array)).toBe(true)
+  const alice = new Employee("Alice", 23, "Transpondster")
+  expect(isOfType(alice, Person)).toBe(true)
+  expect(isOfType(alice, Employee)).toBe(true)
+  expect(isOfType(alice, Person, false)).toBe(false)
+  expect(isOfType(alice, Employee, false)).toBe(true)
 })
