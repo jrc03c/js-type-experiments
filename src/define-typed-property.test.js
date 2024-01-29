@@ -26,6 +26,7 @@ test("test that the `defineTypedProperty` function works as expected", () => {
     const x = {}
     const prop = Math.random().toString()
     defineTypedProperty(x, prop, typeof value)
+    x[prop] = value
 
     for (const other of primitives) {
       let failed = false

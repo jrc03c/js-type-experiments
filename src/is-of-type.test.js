@@ -361,6 +361,10 @@ test("tests that the `isOfType` function works as expected", () => {
   expect(isOfType(people, SymbolArray)).toBe(false)
 
   // check subclasses
+  // NOTE: passing `false` as the second argument to the `createTypedArray`
+  // function to indicate that subclasses aren't allows should yield the same
+  // behavior as passing `false` as the third argument to the `isOfType`
+  // function!
   class Employee extends Person {
     title = null
 
@@ -374,5 +378,10 @@ test("tests that the `isOfType` function works as expected", () => {
   const EmployeeArray = employees.constructor
   expect(isOfType(employees, EmployeeArray, false)).toBe(true)
   expect(isOfType(employees, PersonArray, false)).toBe(false)
-  expect(isOfType(employees, Array, false)).toBe(false)
+  expect(isOfType(employees, Array, false)).toBe(true)
+
+  const employees2 = createTypedArray(Employee, false)
+  expect(isOfType(employees2, EmployeeArray)).toBe(true)
+  expect(isOfType(employees2, PersonArray)).toBe(false)
+  expect(isOfType(employees2, Array)).toBe(true)
 })

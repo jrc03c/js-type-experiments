@@ -1,8 +1,12 @@
-const { isDate } = require("@jrc03c/js-math-tools")
+const { isArray, isDate } = require("@jrc03c/js-math-tools")
 
 function isOfType(value, type, allowSubclassInstances) {
   if (typeof allowSubclassInstances === "undefined") {
     allowSubclassInstances = true
+  }
+
+  if (isArray(value) && type === Array) {
+    return true
   }
 
   if (value === null || typeof value === "undefined") {

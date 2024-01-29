@@ -1,4 +1,4 @@
-const { isDate } = require("@jrc03c/js-math-tools")
+const isOfType = require("./is-of-type")
 
 // options must include:
 // - type
@@ -44,26 +44,7 @@ function defineTypedProperty(obj, prop, type, options) {
   }
 
   function canAccept(value) {
-    if (value === null || typeof value === "undefined") {
-      return true
-    }
-
-    if (this.type === "number" && typeof value === "number" && isNaN(value)) {
-      return true
-    }
-
-    if (type === Date && isDate(value)) {
-      return true
-    }
-
-    try {
-      return (
-        value instanceof type &&
-        (allowsSubclassInstances || value.constructor.name === type.name)
-      )
-    } catch (e) {
-      return typeof value === type
-    }
+    return isOfType(value, type, allowsSubclassInstances)
   }
 
   function challenge(value) {

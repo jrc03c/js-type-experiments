@@ -1,5 +1,6 @@
-const { flatten, isArray, isDate } = require("@jrc03c/js-math-tools")
+const { flatten, isArray } = require("@jrc03c/js-math-tools")
 const { pascalify } = require("@jrc03c/js-text-tools")
+const isOfType = require("./is-of-type")
 
 class TypedArray extends Array {
   static registry = {}
@@ -73,50 +74,12 @@ class TypedArray extends Array {
   }
 
   canAccept(value) {
-    if (isArray(value)) {
-      const temp = flatten(value)
-      return temp.every(v => this.canAccept(v))
-    }
-
-    if (value === null || typeof value === "undefined") {
-      return true
-    }
-
-    if (this.type === "number" && typeof value === "number" && isNaN(value)) {
-      return true
-    }
-
-    if (this.type === Date && isDate(value)) {
-      return true
-    }
-
-    try {
-      if (
-        value instanceof this.type &&
-        (this.allowsSubclassInstances ||
-          value.constructor.name === this.typeString)
-      ) {
-        return true
-      }
-    } catch (e) {
-      // ...
-    }
-
-    if (typeof value === "object") {
-      if (typeof this.type === "function") {
-        if (value instanceof this.constructor) {
-          return true
-        }
-
-        return false
-      } else if (value instanceof this.constructor) {
-        return true
-      } else {
-        return false
-      }
-    } else {
-      return typeof value === this.type
-    }
+    return (
+      isOfType(value, this.type, this.allowsSubclassInstances) ||
+      (isArray(value) &&
+        (value instanceof this.constructor ||
+          flatten(value).every(v => this.canAccept(v))))
+    )
   }
 
   challenge(value) {
