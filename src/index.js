@@ -2,7 +2,7 @@ const out = {
   createType: require("./create-type"),
   createTypedArray: require("./create-typed-array"),
   defineTypedProperty: require("./define-typed-property"),
-  isTypeOf: require("./is-of-type"),
+  isOfType: require("./is-of-type"),
 
   dump() {
     Object.keys(out).forEach(key => {
