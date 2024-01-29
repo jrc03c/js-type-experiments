@@ -236,4 +236,9 @@ test("test that the `createTypedArray` function works as expected", () => {
   expect(s instanceof PersonOnlyArray).toBe(true)
   expect(isOfType(s, PersonAndSubclassesArray)).toBe(false)
   expect(isOfType(s, PersonOnlyArray)).toBe(true)
+
+  // the `new` keyword should be disabled because it can't return proxies, which
+  // are necessary for the correct functioning of typed arrays
+  const t = createTypedArray("number").from([2, 3, 4])
+  expect(() => new t.constructor()).toThrow()
 })
