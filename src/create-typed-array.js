@@ -173,6 +173,22 @@ class TypedArray extends Array {
     return super.fill(value, start, end)
   }
 
+  filter(fn, thisArg) {
+    if (typeof thisArg !== "undefined") {
+      fn = fn.bind(thisArg)
+    } else {
+      fn = fn.bind(this)
+    }
+
+    const out = Array.from(this).filter(fn)
+
+    try {
+      return this.constructor.from(out)
+    } catch (e) {
+      return Array.from(out)
+    }
+  }
+
   from() {
     return this.constructor.from(...arguments)
   }
