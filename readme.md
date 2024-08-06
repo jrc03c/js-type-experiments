@@ -1,3 +1,7 @@
+> ⚠️ **NOTE:** ⚠️ This project is being merged into a monorepo [here](https://github.com/jrc03c/monorepo/tree/main/packages/js-type-experiments). This repo will soon be archived.
+
+---
+
 # Intro
 
 This is just a little utility for doing realtime type-checking in JS. Obviously, there are already [some kinds of typed arrays in JS](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Typed_arrays), but they mostly deal with number types and/or raw binary data. This utility allows for the creation of typed arrays and typed properties of _any_ type.
